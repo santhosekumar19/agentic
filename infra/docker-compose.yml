@@ -1,0 +1,31 @@
+services:
+  ai:
+    build: ../services/ai-service
+    ports:
+      - "127.0.0.1:8000:8000"
+  policy:
+    build: ../services/policy-service
+    environment:
+      PORT: 8082
+    ports:
+      - "127.0.0.1:8082:8082"
+  gateway:
+    build: ../services/gateway
+    environment:
+      PORT: 8080
+      AI_SERVICE_URL: http://ai:8000
+      POLICY_SERVICE_URL: http://policy:8082
+      FRONTEND_ORIGIN: http://localhost:5173
+    depends_on:
+      - ai
+      - policy
+    ports:
+      - "127.0.0.1:8080:8080"
+  web:
+    build: ../apps/web
+    depends_on:
+      - gateway
+    environment:
+      VITE_GATEWAY_URL: http://localhost:8080
+    ports:
+      - "127.0.0.1:5173:5173"

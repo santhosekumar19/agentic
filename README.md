@@ -4,7 +4,7 @@
 
 AegisFlow demonstrates an end-to-end enterprise workflow: a React user asks an operational question, a Node.js/TypeScript BFF resolves a *demo identity*, an independent Java/Spring Boot service makes a role-based policy decision, and a Python/FastAPI service retrieves authorized synthetic knowledge, produces an extractive grounded answer with citations (or an optional API-key-configured LLM response), and exposes a repeatable retrieval evaluation.
 
-> **Truth-in-advertising:** This repository is a working educational baseline, **not** a production AI agent, embedding/vector database, or real financial-services application. An optional OpenAI Responses API adapter is included but cannot be exercised without your own key. Its code intentionally uses local demo headers instead of verifiable authentication tokens. **DO NOT expose it on the public Internet or ingest actual enterprise/customer data.** Planned extensions are in [Roadmap](docs/ROADMAP.md).
+> **Truth-in-advertising:** This repository is a working educational baseline, **not** a production AI agent, embedding/vector database, or real financial-services application. An optional OpenAI Responses API adapter is included but cannot be exercised without your own key. Its code intentionally uses local demo headers instead of verifiable authentication tokens. **DO NOT expose it on the public Internet or ingest actual enterprise/customer data.** Production-ready implementations are in [Roadmap](docs/ROADMAP.md).
 
 ## Architecture
 
@@ -108,30 +108,24 @@ curl -s http://localhost:8080/api/evals \
 4. **Leadership:** Present the [architecture decision](docs/ADR-001.md), [delivery phases](docs/ROADMAP.md), team boundaries, nonfunctional requirements, backlog and quality gates.
 5. **FDE:** Present a simulated customer discovery, acceptance criteria, deployment plan and success metrics from [FDE case study](docs/FDE_CASE_STUDY.md).
 
-## Retrieval and tool demonstration
+## Current quality status
 
-The baseline assistant uses BM25-style ranking. To compare rankings, POST the same question and demo identity to the gateway at `/api/search` and `/api/hybrid`. Hybrid search fuses lexical ranks with cosine ranks over character trigram vectors using reciprocal rank fusion. This supports misspellings without model downloads. Trigrams measure spelling overlap. A trained semantic encoder and cross-encoder reranker remain future work.
+- Python/FastAPI: **8 passing local tests**; live optional model API not exercised.
+- Node.js/TypeScript gateway: **4 passing local tests** with Node 22 native TypeScript stripping.
+- Java/Spring Boot: implementation and JUnit tests included; **Maven tests not executed in this environment**.
+- React: implementation included; **dependency installation / production build not executed in this environment**.
+- Full Docker integration and security review: **not yet executed**.
 
-The read-only stdio MCP service binds its tenant at startup. From `services/ai-service`, install `requirements-mcp.txt` and run `python tests/check_mcp_stdio.py` for a complete client/server exchange. To connect a local MCP client, use command `python -m app.mcp_server` in that directory with `AEGISFLOW_TENANT=demo-bank` in its environment. The client can discover and call `search_policy`.
+## Portfolio integrity
 
-## Verification on 14 November 2026
+This repository demonstrates skills; it **does not prove historical years of employment with a language or framework**. Career-profile drafts and personally identifiable details are deliberately excluded from this public repository. This synthetic demo does not prove historical years of professional experience or customer outcomes.
 
-Nine Python API and adapter checks passed when invoked directly using FastAPI TestClient, including the hybrid spelling and tenant filter regression. Four Node gateway tests passed. The real stdio MCP client discovered the tool and retrieved a cited policy. The local Node-to-FastAPI smoke test passed two assertions, including rejection of analyst access to evaluation. The expected document appeared among the first three for four of four synthetic evaluation questions. This small set measures regression only.
+License: MIT. Synthetic assets only.
 
-Java and Docker builds, a frontend production build, live model calls, cloud infrastructure, and a production identity provider remain unverified in this environment. The demo uses local synthetic identities. See the architecture notes before extending it.
+## Repository and next steps
 
-License: MIT.
+**Source:** https://github.com/santhosekumar19/agentic
 
-### Authenticated gateway mode
+This is the initial public technical portfolio baseline. See [Roadmap](docs/ROADMAP.md), [Architecture](docs/ARCHITECTURE.md), and [FDE case study](docs/FDE_CASE_STUDY.md) for capabilities and planned upgrades.
 
-For API clients, set AEGISFLOW_CREDENTIALS to a JSON array of records with digest (SHA-256 hex of a randomly generated 32-byte base64url token), user, tenant and roles (comma-separated). Send the token as an Authorization Bearer credential. Identity and roles come only from the configured records. Invalid configuration prevents startup. Remove a record and restart to revoke it. The React console defaults to the independent localhost demo-header mode. Bind backends to loopback or a private network, use TLS for remote traffic, and keep credentials outside source control. This is a pre-provisioned credential demonstration, with no interactive identity provider.
-
-A fifth gateway test verifies credential binding and denial for missing or incorrect credentials.
-
-### Optional integrations awaiting runtime verification
-
-* LangGraph: install services/ai-service/requirements-workflow.txt. From that service run `PYTHONPATH=. python tests/check_workflow.py`. The retrieval node routes to either a cited extractive answer or an operator-review response. Dependency download was unavailable during verification.
-* Event processing: start a private Redis and PostgreSQL instance, set REDIS_URL and DATABASE_URL, apply integrations/audit/schema.sql and install the adjacent requirements.txt. Start worker.py, run publish_sample.py with the gateway in local demo mode, and query retrieval_event for the printed UUID. The consumer commits its stream cursor and idempotent event insert in one database transaction. Run the worker again to resume from the committed cursor. This optional sample emits metadata from an explicit lookup. It does not record every request. These backend services were unavailable for a runtime check.
-* AWS deployment design: serve the frontend from S3/CloudFront, place the gateway behind an HTTPS load balancer, keep the policy and retrieval services on private EKS networking, and restrict the worker to ElastiCache and RDS using scoped security groups. Keep credentials in Secrets Manager. This topology is a design, with no live AWS deployment.
-
-For a local disposable Kubernetes cluster, build images tagged aegisflow-ai:local, aegisflow-policy:local, aegisflow-gateway:local and aegisflow-web:local from their service directories. Load them into your cluster, apply infra/kubernetes-local.yaml in a dedicated namespace, then port-forward service/web 5173:5173 and service/gateway 8080:8080. The manifest defines four deployments and four ClusterIP services. Only YAML structure was checked locally.
+**Publication checklist:** Keep all real customer data, work repositories, credentials, private personnel records, and detailed career drafts out of this public project. Before demonstrating externally, verify the relevant GitHub Actions workflow results and run the full stack locally.
